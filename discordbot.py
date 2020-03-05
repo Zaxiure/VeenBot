@@ -1,13 +1,16 @@
+import os
 import random
 import string
 import discord
+from discord.utils import get
 from datetime import datetime
+from py_dotenv import read_dotenv
 
 def randomStringDigits(stringLength=6):
     lettersAndDigits = string.ascii_letters + string.digits
     return ''.join(random.choice(lettersAndDigits) for i in range(stringLength))
 
-def newBot(token, connection, mysql):
+def newBot(token, connection, mysql, activation_channel):
     client = discord.Client()
 
     def getPrefix():
@@ -18,9 +21,10 @@ def newBot(token, connection, mysql):
         dm_channel = member.dm_channel
         if dm_channel == None:
             dm_channel = await member.create_dm()
-
         random_string = randomStringDigits(12)
-        await dm_channel.send("Heya, **{1}**!\n\nTof dat je ervoor kiest om onze discord te joinen!\nOm toegang te krijgen tot alle kanalen zul je eerst moeten inloggen via onze site. \n\n**Zorg ervoor dat je deze link met __NIEMAND__ deelt**\nhttps://veenstad.com/verificatie?key={0}".format(random_string, member.name))
+        await dm_channel.send("Heya, **{1}**!\n\nTof dat je ervoor kiest om onze discord te joinen!\nOm toegang te krijgen tot alle kanalen zul je eerst moeten inloggen via onze site. \n\n**Zorg ervoor dat je deze link met __NIEMAND__ deelt**\nhttp://veenstadrp-web.test/verificatie/{0}".format(random_string, member.name))
+        connection.execute('INSERT INTO activation (activation_id, discord_id, discord_name) VALUES (%s, %s, %s)', (random_string, member.id, member.name))
+        mysql.commit()
 
     @client.event
     async def on_ready():
@@ -37,6 +41,12 @@ def newBot(token, connection, mysql):
         args = actualMessage.split()
         channel = message.channel
         member = message.author
+
+        if channel.id == int(activation_channel):
+            print('called')
+            role = get(message.guild.roles, name='Bewoner')
+            await message.mentions[0].add_roles(role)
+            print(message.mentions[0])
         if message.channel.type == discord.ChannelType.private:
             return
         if actualMessage.lower().startswith('!verificatie'):

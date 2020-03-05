@@ -14,4 +14,4 @@ mydb = mysql.connector.connect(
 )
 
 connection = mydb.cursor()
-newBot(os.getenv('DISCORD_TOKEN'), connection, mydb)
+newBot(os.getenv('DISCORD_TOKEN'), connection, mydb, os.getenv('ACTIVATION_CHANNEL'))
