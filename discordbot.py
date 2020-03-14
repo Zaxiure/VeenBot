@@ -46,9 +46,9 @@ def newBot(token, connection, mysql, activation_channel, domain):
         print('{0} Bot is now ready and running!'.format(getPrefix()))
         await client.change_presence(activity=discord.Activity(name=".verificatie.", type=discord.ActivityType.listening))
 
-    # @client.event
-    # async def on_member_join(member):
-    #     await sendVerification(member)
+    @client.event
+    async def on_member_join(member):
+        await sendVerification(member)
 
     @client.event
     async def on_message(message):
